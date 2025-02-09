@@ -1,9 +1,40 @@
+<#
+function Edit-Profile {
+    param(
+        [ValidateSet("All", "Current")]
+        [string] $User = "Current",
+        [ValidateSet("All", "Current")]
+        [string] $Hosts = "Current",
+	    [string] $Editor = "code"
+    )
+    $_user = If( $user -eq "All" ){ "AllUsers" } Else { "CurrentUser" }
+    $_hosts = If( $hosts -eq "All" ){ "AllHosts" } Else { "CurrentHost" }
+
+    $chosen = $profile."$_user$_hosts"
+
+    if( $Editor -eq "code" ){
+        $chosen = $chosen | Split-Path
+    }
+
+    $result = & $Editor $chosen
+
+    if( $null -ne $result ){
+        $result
+    } else {
+        $chosen
+    }
+}
+
+Write-Host "Edit your pwsh profile with: " -ForegroundColor Yellow -NoNewline;
+Write-Host "Edit-Profile" -BackgroundColor DarkCyan -ForegroundColor Black -NoNewline; Write-Host;
+Write-Host;
+#>
+
 function global:Invoke-WildcardScriptfiles {
     [CmdletBinding()]
     param(
         [string[]] $Paths
     )
-
 
     $Paths | Resolve-Path | ForEach-Object {
         $_.ToString()
