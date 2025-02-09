@@ -1,6 +1,6 @@
 function global:Add-ScriptMethods {
     param(
-        [psobject] $target,
+        [psobject] $Target,
         [System.Collections.IDictionary] $Members
     )
 
