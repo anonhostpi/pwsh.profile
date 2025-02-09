@@ -10,7 +10,6 @@ function global:Show-Menu {
             }
         }),
         [string] $Title = "Select an Option:",
-        [switch] $ArrowsSelect,
         [switch] $ShowSelected
     )
 
