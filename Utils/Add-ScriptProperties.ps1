@@ -1,6 +1,6 @@
 function global:Add-ScriptProperties {
     param(
-        [psobject] $target,
+        [psobject] $Target,
         [System.Collections.IDictionary] $GetterSetters
     )
 
