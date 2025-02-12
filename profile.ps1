@@ -47,6 +47,9 @@ function global:Invoke-WildcardScriptfiles {
 Set-Alias -Scope Global -Name "run" -Value "Invoke-WildcardScriptfiles"
 Set-Alias -Scope Global -Name "resolve" -Value "Resolve-Path"
 
+# Params: $Path
+& "$PSScriptRoot\Utils\Test-WindowsPath"
+
 & { # Simple Object Methods
     # Params: $Target, $Members
     & "$PSScriptRoot\Utils\Add-NoteProperties.ps1"
