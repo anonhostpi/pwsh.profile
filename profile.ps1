@@ -47,6 +47,14 @@ function global:Invoke-WildcardScriptfiles {
 Set-Alias -Scope Global -Name "run" -Value "Invoke-WildcardScriptfiles"
 Set-Alias -Scope Global -Name "resolve" -Value "Resolve-Path"
 
+# Typing:
+# Params: $Value
+& "$PSScriptRoot\Utils\Test-Primitive.ps1"
+
+# Path parsing:
+# Params: $Path
+& "$PSScriptRoot\Utils\Test-WindowsPath.ps1"
+
 & { # Simple Object Methods
     # Params: $Target, $Members
     & "$PSScriptRoot\Utils\Add-NoteProperties.ps1"
@@ -57,6 +65,10 @@ Set-Alias -Scope Global -Name "resolve" -Value "Resolve-Path"
 }
 
 & { # Object-Table Parsing
+    # Params: $Path
+    & "$PSScriptRoot\Utils\Build-PathTree.ps1"
+    # Params: $InputObject, [sb] $Process, [switch] $Flat, [switch] $JsonMode
+    & "$PSScriptRoot\Utils\ForEach-Leaf.ps1"
     # Params: $InputObject, $TypeException, [switch] $Shallow
     & "$PSScriptRoot\Utils\ConvertTo-OrderedHashtable.ps1"
     # Params: $InputObject, $IndentLevel, [switch] $Short

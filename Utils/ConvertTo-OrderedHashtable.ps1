@@ -36,19 +36,11 @@ function global:ConvertTo-OrderedHashtable {
         }
         return @($out)
     }
-    elseif ($InputObject -is [psobject] -and -not ($TypeException -and $InputObject -is $TypeException)) {
+    elseif (-not (Test-Primitive $InputObject) -and -not ($TypeException -and $InputObject -is $TypeException)) {
         # Convert PSObject to ordered hashtable
         $orderedHashtable = [ordered]@{}
         foreach ($property in $InputObject.PSObject.Properties) {
-            $value = If( [string]::IsNullOrWhiteSpace( $property.Value.PSObject.BaseObject ) ){
-                If( $property.Value.PSObject.BaseObject -eq $null ){
-                    $null
-                } Else {
-                    $value
-                }
-            } Else {
-                $property.Value.PSObject.BaseObject
-            }
+            $value = $property.Value
             $orderedHashtable[$property.Name] = If( $Shallow ) {
                 $value
             } ElseIf( $null -ne $value ){

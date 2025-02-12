@@ -12,6 +12,7 @@ New-Module -Name "ObjectFactories" -Scriptblock {
                         # - $Original: equivalent to $this, but as the user provided it (can be a path, JSON string, hashtable, or psobject)
                         # - $Trees: the Objects used for Resolve-Options and Resolve-Parameters
                 # - Methods
+            $PostscriptOptions,
             [string] $Name,
             [switch] $Scriptblock
         )
@@ -19,7 +20,7 @@ New-Module -Name "ObjectFactories" -Scriptblock {
         $output = @{}
 
         $p = @{
-            ArgumentList = @($Options, $output)
+            ArgumentList = @($Options, $output, $PostscriptOptions)
         }
 
         If( -not [string]::IsNullOrWhitespace( $Name ) ){
@@ -39,14 +40,15 @@ New-Module -Name "ObjectFactories" -Scriptblock {
                             # - $Original: equivalent to $this, but as the user provided it (can be a path, JSON string, hashtable, or psobject)
                             # - $Trees: the Objects used for Resolve-Options and Resolve-Parameters
                     # - Methods
-                $Output
+                $Output,
                     # - Import
+                $PostscriptOptions
             )
 
             $trees = @{
-                Invalidators = (& { If( $Options.Invalidators ){ ConvertTo-OrderedHashtable $Options.Invalidators [scriptblock] } })
-                Cleaners = (& { If( $Options.Cleaners ){ ConvertTo-OrderedHashtable $Options.Cleaners [scriptblock] } })
-                Base = (& { If( $Options.Base ){ ConvertTo-OrderedHashtable $Options.Base [scriptblock] } })
+                Invalidators = (& { If( $Options.Invalidators ){ ConvertTo-OrderedHashtable $Options.Invalidators [scriptblock] } Else { @{} } })
+                Cleaners = (& { If( $Options.Cleaners ){ ConvertTo-OrderedHashtable $Options.Cleaners [scriptblock] } Else { @{} } })
+                Base = (& { If( $Options.Base ){ ConvertTo-OrderedHashtable $Options.Base [scriptblock] } Else { @{} } })
             }
 
             $imports = @{
@@ -54,11 +56,19 @@ New-Module -Name "ObjectFactories" -Scriptblock {
                 Methods = $Options.Methods
             }
 
+            $imports.Methods.Clone = {
+                & $Output.Import $this
+            }
+
             $Output.Import = {
                 param(
-                    $Source = @{},
+                    $Source,
                     $Original = $Source
                 )
+
+                If( $Source -eq $null ){
+                    $Source = @{}
+                }
 
                 $props = $Source
 
@@ -106,7 +116,8 @@ New-Module -Name "ObjectFactories" -Scriptblock {
                     New-Module {
                         param(
                             $Store,
-                            $Output
+                            $Output,
+                            $Trees
                         )
 
                         $cache = @{}
@@ -119,22 +130,22 @@ New-Module -Name "ObjectFactories" -Scriptblock {
                                     $Value
                                 )
 
-                                $invalidator = $trees.Invalidator[$Key]
-                                $cleaner = $trees.Cleaners[$Key]
+                                $invalidator = $Trees.Invalidators[$Key]
+                                $cleaner = $Trees.Cleaners[$Key]
                                 $base = $cache.Store[$Key]
 
                                 # important for allowing hashtables:
-                                $recurse = $trees.Base[$Key] -is [System.Collections.IDictionary]
+                                $recurse = $Trees.Base[$Key] -is [System.Collections.IDictionary]
 
-                                $_invalidator = If( $trees.Invalidator[$Key] ){
-                                    $trees.Invalidator[$Key]
+                                $_invalidator = If( $Trees.Invalidators[$Key] ){
+                                    $Trees.Invalidators[$Key]
                                 } Elseif( $recurse ){
                                     @{}
                                 } Else {
                                     { $false } # PassThrough
                                 }
-                                $_cleaner = If( $trees.Cleaners[$Key] ){
-                                    $trees.Cleaners[$Key]
+                                $_cleaner = If( $Trees.Cleaners[$Key] ){
+                                    $Trees.Cleaners[$Key]
                                 } Elseif( $recurse ) {
                                     @{}
                                 } Else {
@@ -188,7 +199,7 @@ New-Module -Name "ObjectFactories" -Scriptblock {
                         Add-ScriptProperties $Output.Object $cache.ScriptProperties
 
                         Export-ModuleMember
-                    } -ArgumentList $props,$shared | Import-Module
+                    } -ArgumentList $props,$shared,$trees | Import-Module
                 }
 
                 $out = $shared.Object
@@ -199,7 +210,7 @@ New-Module -Name "ObjectFactories" -Scriptblock {
                     $imports.Post | Where-Object { $_ } | ForEach-Object {
                         [scriptblock] $sb = $_
 
-                        & $sb $out $Source $Original $trees | Out-Null
+                        & $sb $out $Source $Original $trees $PostscriptOptions | Out-Null
                     }
                 }
 
@@ -300,7 +311,9 @@ New-Module -Name "ObjectFactories" -Scriptblock {
                 $this.Path = $Path
                 $dir = $Path | Split-Path -Parent
 
-                New-Item -ItemType Directory -Path $dir -Force | Out-Null
+                If( -not [string]::IsNullOrWhiteSpace( $dir ) ){
+                    New-Item -ItemType Directory -Path $dir -Force | Out-Null
+                }
 
                 $this | Select-Object -ExcludeProperty $live_properties | ConvertTo-Json -Depth 100 | Out-File $Path
             }
