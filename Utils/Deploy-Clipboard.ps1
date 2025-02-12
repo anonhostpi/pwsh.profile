@@ -11,12 +11,14 @@ function global:Deploy-Clipboard {
         Do {
             Sleep -Milliseconds 1000
             $out = Get-Clipboard
-        } While( $Contents.Trim() -eq ($out -join "`r`n" -replace "(?<!\r)\n","`r`n").Trim() )
-        Write-Host "Clipboard received!"
+        } While( ($Contents.Trim() -eq $out.Trim()) -or [string]::IsNullOrWhiteSpace($out) )
+        
         Try {
             $out | ConvertFrom-Json
+            Write-Host "Clipboard parsed!"
         } Catch {
-            $out
+            Write-Host "Clipboard received!"
+            return $out
         }
     } Else {
         Pause
