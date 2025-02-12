@@ -37,7 +37,7 @@ New-ValidatingFactory -Options @{
             $unmodified = $true
 
             $variable_pattern = $this.VariablePattern
-            $line_ending = $Settings.LineEndings.Regex.Both
+            $line_ending = "\r{0,1}\n"
 
             $components = $this.Components
             $keys = $components.Keys | ForEach-Object { $_ }
@@ -139,7 +139,7 @@ New-ValidatingFactory -Options @{
             $components = $this.Components
             $keys = $components.Keys | ForEach-Object { $_ }
 
-            $line_ending = $Settings.LineEndings.Strings.Unix
+            $line_ending = "`n"
 
             $no_deps = foreach( $key in $keys ){
                 If( $components[$key].DependsOn.Count -eq 0 ){

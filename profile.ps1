@@ -110,9 +110,12 @@ Set-Alias -Scope Global -Name "resolve" -Value "Resolve-Path"
 #       - Params: $Object, $Descriptor, $ConstructorOptions
 & "$PSScriptRoot\Utils\ObjectFactories.ps1"
 
-# Clipboard Tools
-# Params: $Contents, [switch] $Communicate
-& "$PSScriptRoot\Utils\Deploy-Clipboard.ps1"
+& { # Clipboard Tools
+    # Params: $Contents, [switch] $Communicate
+    & "$PSScriptRoot\Utils\Deploy-Clipboard.ps1"
+    # Params: <none>
+    & "$PSScriptRoot\Utils\Loop-Clipboard.ps1"
+}
 
 # Text Processing
 # refer to script...

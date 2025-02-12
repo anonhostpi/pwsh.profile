@@ -130,22 +130,22 @@ New-Module -Name "ObjectFactories" -Scriptblock {
                                     $Value
                                 )
 
-                                $invalidator = $Trees.Invalidators[$Key]
-                                $cleaner = $Trees.Cleaners[$Key]
-                                $base = $cache.Store[$Key]
+                                $invalidator = $Trees.Invalidators."$Key"
+                                $cleaner = $Trees.Cleaners."$Key"
+                                $base = $cache.Store."$Key"
 
                                 # important for allowing hashtables:
-                                $recurse = $Trees.Base[$Key] -is [System.Collections.IDictionary]
+                                $recurse = $base -is [System.Collections.IDictionary]
 
-                                $_invalidator = If( $Trees.Invalidators[$Key] ){
-                                    $Trees.Invalidators[$Key]
+                                $_invalidator = If( $Trees.Invalidators."$Key" ){
+                                    $Trees.Invalidators."$Key"
                                 } Elseif( $recurse ){
                                     @{}
                                 } Else {
                                     { $false } # PassThrough
                                 }
-                                $_cleaner = If( $Trees.Cleaners[$Key] ){
-                                    $Trees.Cleaners[$Key]
+                                $_cleaner = If( $Trees.Cleaners."$Key" ){
+                                    $Trees.Cleaners."$Key"
                                 } Elseif( $recurse ) {
                                     @{}
                                 } Else {
