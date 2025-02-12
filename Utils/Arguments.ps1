@@ -55,25 +55,25 @@ function global:Resolve-Options {
     $acceptable_keys = $Base.Keys | ForEach-Object { "$_" }
     If( $acceptable_keys.Count ){
         $acceptable_keys | ForEach-Object {
-            $recurse = $Base[$_] -is [System.Collections.IDictionary]
+            $recurse = $Base."$_" -is [System.Collections.IDictionary]
 
-            $_invalidator = If( $Invalidators[$_] ){
-                $Invalidators[$_]
+            $_invalidator = If( $Invalidators."$_" ){
+                $Invalidators."$_"
             } Elseif( $recurse ){
                 @{}
             } Else {
                 { param($o); $null -eq $o } # Non-Null (so that defaulting works)
             }
-            $_cleaner = If( $Cleaners[$_] ){
-                $Cleaners[$_]
+            $_cleaner = If( $Cleaners."$_" ){
+                $Cleaners."$_"
             } Elseif( $recurse ) {
                 @{}
             } Else {
                 { param( $o ); $o } # PassThrough
             }
 
-            $_option = $Options[$_]
-            $_base = $Base[$_]
+            $_option = $Options."$_"
+            $_base = $Base."$_"
            
             If( $recurse ){
                 If( -not ($_invalidator -is [System.Collections.IDictionary]) ){
@@ -88,9 +88,9 @@ function global:Resolve-Options {
                     }
                 }
 
-                $resolved[$_] = Resolve-Options $_invalidator $_cleaner $_base $_option $Original $Resolving
+                $resolved."$_" = Resolve-Options $_invalidator $_cleaner $_base $_option $Original $Resolving
             } Else {
-                $resolved[$_] = Resolve-Parameter $_invalidator $_cleaner $_base $_option $Original $Resolving
+                $resolved."$_" = Resolve-Parameter $_invalidator $_cleaner $_base $_option $Original $Resolving
             }
         }
     }
